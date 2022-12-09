@@ -1,0 +1,553 @@
+' Chip definition
+#CHIP 16F18875
+
+' LCD definitions
+#DEFINE LCD_IO 4
+#DEFINE LCD_RS portd.0
+#DEFINE LCD_RW portd.1
+#DEFINE LCD_ENABLE portd.2
+#DEFINE LCD_DB4 portd.4
+#DEFINE LCD_DB5 portd.5
+#DEFINE LCD_DB6 portd.6
+#DEFINE LCD_DB7 portd.7
+
+' Sensor definitions
+#DEFINE LW porta.0
+#DEFINE FW porta.1
+#DEFINE FS porta.2
+#DEFINE LS porta.3
+
+' Motor/Fan definitions
+#DEFINE RMF portb.0
+#DEFINE RMB portb.1
+#DEFINE LMF portb.3
+#DEFINE LMB portb.2
+#DEFINE FAN portb.4
+
+' Input/Output port direction
+DIR porta IN
+DIR portb OUT
+
+' Variable definitions
+DIM voltage AS BYTE
+DIM distanceFront AS BYTE
+DIM voltageLeft AS BYTE
+DIM distanceLeft AS BYTE
+DIM voltageFlame AS BYTE
+DIM roomCounter AS INTEGER
+DIM xVar AS WORD
+DIM leftCounter AS INTEGER
+
+roomCounter = 0
+leftCounter = 0
+
+main:
+
+  gosub followWall
+
+  goto main
+
+sub room3
+
+  Do Until distanceFront <= 10
+
+    gosub readSensors
+    CLS
+    Locate(0, 1)
+    Print roomCounter
+    Locate(1,1)
+    Print distanceFront
+    gosub smoothTurnRight
+
+  loop
+
+  Do Until distanceFront >= 15
+
+    gosub readSensors
+    CLS
+    Locate(0, 1)
+    Print roomCounter
+    Locate(1,1)
+    Print distanceFront
+    gosub turnRightInPlace
+
+  loop
+
+  gosub turnLeftInPlace
+  wait 100 ms
+
+  Do Until distanceLeft >= 20
+
+    gosub readSensors
+    CLS
+    Locate(0, 1)
+    Print roomCounter
+    Locate(1,1)
+    Print distanceLeft
+
+    if distanceLeft >= 15 then
+
+      gosub farLeftB
+
+      else if distanceLeft <= 10 then
+
+        gosub closeLeftB
+
+      else
+
+        gosub backwards
+
+    end if
+    gosub backwards
+
+  loop
+
+  gosub backwards
+  wait 300 ms
+
+  gosub stopBot
+
+  for xVar = 0 To 10
+
+    gosub readSensors
+
+
+    if voltageFlame <= 100 then
+
+      gosub outFlame
+
+    end if
+
+    wait 5 ms
+
+  next
+
+  wait 150 ms
+
+  gosub turnRightInPlace
+  wait 40 ms
+
+  gosub forwards
+  wait 400 ms
+  gosub readSensors
+
+  Do Until LS = 0
+    gosub readSensors
+    gosub forwards
+
+    loop
+
+  roomCounter = 4
+
+  gosub forwards
+  wait 550 ms
+  gosub turnLeftInPlace
+  wait 375 ms
+  gosub forwards
+  wait 750 ms
+
+  return
+
+sub room4
+
+  if distanceFront <= 10 then
+    Do Until distanceFront >= 15
+      gosub readSensors
+      gosub turnLeftInPlace
+    loop
+  end if
+
+  gosub turnLeftInPlace
+  wait 75 ms
+
+  Do Until distanceFront <= 10
+
+    gosub readSensors
+    gosub forwards
+  loop
+
+  gosub readSensors
+
+  Do Until distanceFront >= 15
+    gosub turnLeftInPlace
+    gosub readSensors
+  loop
+
+  gosub turnLeftInPlace
+  wait 40 ms
+
+  Do Until LS = 0
+    gosub readSensors
+    gosub forwards
+    wait 1 ms
+    gosub stopBot
+    wait 1 ms
+
+    if distanceFront <= 10 then
+
+      gosub backwards
+      wait 100 ms
+
+        Do Until distanceFront >= 15
+          gosub readSensors
+          gosub turnLeftInPlace
+        loop
+
+    end if
+  loop
+
+  gosub backwards
+  wait 350 ms
+
+  gosub stopBot
+  wait 500 ms
+
+  gosub turnLeftInPlace
+  wait 375 ms
+
+  gosub readSensors
+
+  Do until distanceFront <= 10
+    gosub readSensors
+    gosub forwards
+  loop
+
+  gosub readSensors
+  gosub turnRightInPlace
+  wait 325 ms
+
+
+
+  gosub stopBot
+  wait 300 ms
+
+  gosub readSensors
+
+  Do until distanceFront <= 10
+    gosub readSensors
+    gosub forwards
+  loop
+
+  gosub stopBot
+  wait 300 ms
+  gosub readSensors
+  gosub forwards
+
+  if voltageFlame <= 15 then
+    gosub outFlame
+  end if
+
+  return
+
+sub followWall
+
+  CLS
+  Locate(0, 1)
+  Print roomCounter
+  Locate(1,1)
+  Print distanceLeft
+
+  gosub readSensors
+
+  if LS = 0 then
+
+    roomCounter += 1
+    gosub forwards
+    wait 100 ms
+
+    if roomCounter = 3 then
+
+      gosub room3
+
+    end if
+
+    else if roomCounter = 4 and distanceFront <= 16 then
+
+     roomCounter += 1
+
+     gosub forwards
+     wait 100 ms
+
+     gosub turnLeftInPlace
+     wait 350 ms
+
+     Do Until LS = 0
+      gosub forwards
+      gosub readSensors
+     loop
+
+     gosub room4
+
+    else if voltageFlame <= 12 then
+
+      gosub outFlame
+
+    else if distanceFront <= 15 then
+
+      gosub turnRightInPlace
+
+    else if distanceLeft >= 23 then
+
+      gosub smoothTurnLeft
+
+    else if distanceLeft >= 15 then
+
+      gosub farLeftS
+
+    else if distanceLeft <= 8 then
+
+      gosub closeLeftS
+
+    else if distanceLeft >= 13 then
+
+      gosub farLeft
+
+    else if distanceLeft <= 10 then
+
+      gosub closeLeft
+    else
+
+      gosub forwards
+
+  end if
+
+return
+
+sub readSensors
+
+ voltageLeft = ReadAD(AN0)
+ distanceLeft = (((6787/(voltageLeft-3)))-4)/5
+ voltageFront = ReadAD(AN1)
+ distanceFront = (((6787/(voltageFront-3)))-4)/5
+ voltageFlame = ReadAD(AN2)
+
+ return
+
+sub forwards
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+
+  return
+
+sub backwards
+
+  RMF = 0
+  LMF = 0
+  RMB = 1
+  LMB = 1
+
+  return
+
+sub stopBot
+
+  RMF = 0
+  LMF = 0
+  RMB = 0
+  LMB = 0
+
+  return
+
+sub turnLeftInPlace
+
+  RMF = 1
+  LMF = 0
+  RMB = 0
+  LMB = 1
+
+  return
+
+sub turnRightInPlace
+
+  RMF = 0
+  LMF = 1
+  RMB = 1
+  LMB = 0
+
+  return
+
+sub lineDetection
+
+  roomCounter += 1
+
+  if LS = 0 then
+
+  gosub lineDetection
+
+  end if
+
+  goto main
+
+sub closeLeft
+
+  RMF = 0
+  LMF = 1
+  LMB = 0
+  RMB = 0
+  wait 1 ms
+  gosub forwards
+  wait 3 ms
+
+  return
+
+sub farLeft
+
+  RMF = 1
+  LMF = 0
+  LMB = 0
+  RMB = 0
+  wait 1 ms
+  gosub forwards
+  wait 3 ms
+
+  return
+
+sub closeLeftS
+
+  gosub turnRightInPlace
+  wait 1 ms
+  gosub forwards
+  wait 2 ms
+
+  return
+
+sub farLeftS
+
+  gosub turnLeftInPlace
+  wait 1 ms
+  gosub forwards
+  wait 2 ms
+
+  return
+
+sub closeLeftB
+
+  gosub turnLeftInPlace
+  wait 1 ms
+  gosub backwards
+  wait 3 ms
+
+  return
+
+sub farLeftB
+
+  gosub turnRightInPlace
+  wait 1 ms
+  gosub backwards
+  wait 3 ms
+
+  return
+
+sub smoothTurnLeft
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 2 ms
+  RMF = 1
+  LMF = 0
+  RMB = 0
+  LMB = 0
+  wait 5 ms
+
+return
+
+sub smoothTurnRight
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 2 ms
+  RMF = 0
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 5 ms
+
+return
+
+sub sharpTurnLeft
+
+  gosub forwards
+  wait 1 ms
+  gosub turnLeftInPlace
+  wait 4 ms
+
+return
+
+sub outFlame
+
+  if roomCounter = 1 then
+    gosub forwards
+    wait 250 ms
+    gosub turnRightInPlace
+    wait 350 ms
+    gosub forwards
+    wait 1250 ms
+
+    else if roomCounter = 2 then
+
+      gosub turnRightInPlace
+      wait 350 ms
+      gosub forwards
+      wait 1750 ms
+
+    else if roomCounter = 3 then
+
+      gosub turnRightInPlace
+      wait 500 ms
+
+      Do Until LS = 0
+        gosub readSensors
+        gosub forwards
+        wait 1 ms
+        gosub stopBot
+        wait 2 ms
+
+        if distanceFront <= 10 then
+
+          Do Until distanceFront >= 15
+            gosub turnLeftInPlace
+          loop
+
+        end if
+      loop
+
+      gosub backwards
+      wait 250 ms
+
+    else if roomCounter = 5 then
+
+      gosub turnRightInPlace
+      wait 400 ms
+      gosub forwards
+      wait 250 ms
+
+  end if
+
+  FAN = 1
+
+  gosub stopBot
+  wait 600 ms
+
+  gosub turnLeftInPlace
+  wait 400 ms
+
+  For xVar = 1 To 3
+
+    gosub turnRightInPlace
+    wait 800 ms
+    gosub turnLeftInPlace
+    wait 800 ms
+  next
+
+  gosub turnRightInPlace
+  wait 400 ms
+
+  FAN = 0
+
+  return

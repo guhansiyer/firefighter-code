@@ -1,0 +1,366 @@
+' Chip definition
+#CHIP 16F18875
+
+' LCD definitions
+#DEFINE LCD_IO 4
+#DEFINE LCD_RS portd.0
+#DEFINE LCD_RW portd.1
+#DEFINE LCD_ENABLE portd.2
+#DEFINE LCD_DB4 portd.4
+#DEFINE LCD_DB5 portd.5
+#DEFINE LCD_DB6 portd.6
+#DEFINE LCD_DB7 portd.7
+
+' Sensor definitions
+#DEFINE LW porta.0
+#DEFINE FW porta.1
+#DEFINE FS porta.2
+#DEFINE LS porta.3
+
+' Motor/Fan definitions
+#DEFINE RMF portb.0
+#DEFINE RMB portb.1
+#DEFINE LMF portb.3
+#DEFINE LMB portb.2
+#DEFINE FAN portb.4
+
+' Input/Output port direction
+DIR porta IN
+DIR portb OUT
+
+' Variable definitions
+DIM voltage AS BYTE
+DIM distanceFront AS BYTE
+DIM voltageLeft AS BYTE
+DIM distanceLeft AS BYTE
+DIM voltageFlame AS BYTE
+DIM roomCounter AS INTEGER
+DIM xVar AS WORD
+
+roomCounter = 0
+
+main:
+
+  gosub doStuff
+
+  goto main
+
+sub doStuff
+
+  CLS
+  Locate(0, 1)
+  Print roomCounter
+  Locate(1,1)
+  Print distanceLeft
+
+  gosub readSensors
+
+  if LS = 0 then
+
+      roomCounter += 1
+      gosub forwards
+      wait 100 ms
+       if roomCounter = 6 then
+        roomCounter += 1
+        gosub room4
+      end if
+
+    else if voltageFlame <= 5 then
+
+      gosub outFlame
+
+    else if distanceFront <= 15 then
+
+      gosub turnRightInPlace
+
+    else if distanceLeft >= 20 then
+
+      gosub smoothTurnLeft
+
+    else if distanceLeft >= 10 then
+
+      gosub farLeft
+
+    else if distanceLeft <= 8 then
+
+      gosub closeLeft
+
+    else
+
+      gosub forwards
+
+  end if
+
+  return
+
+sub room4
+
+  Do Until distanceFront <= 10
+    CLS
+    Locate(0, 1)
+    Print roomCounter
+    Locate(1,1)
+    Print distanceFront
+
+    gosub readSensors
+    gosub smoothTurnLeft
+
+  loop
+
+
+  gosub stopBot
+  wait 500 ms
+
+  Do Until distanceFront >= 15
+
+    CLS
+    Locate(0, 1)
+    Print roomCounter
+    Locate(1,1)
+    Print distanceFront
+
+    gosub readSensors
+
+    gosub turnRightInPlace
+
+  loop
+
+  gosub forwards
+  wait 750 ms
+
+  gosub turnLeftInPlace
+  wait 250 ms
+
+  gosub forwards
+  wait 750 ms
+
+  gosub turnRightInPlace
+  wait 150 ms
+
+  Do Until distanceFront <= 15
+
+    for xVar = 1 To 3
+
+      gosub turnRightInPlace
+
+      CLS
+      Locate(0, 1)
+      Print roomCounter
+      Locate(1,1)
+      Print distanceFront
+
+      gosub readSensors
+
+      if distanceFront <= 15 then
+        goto main
+      end if
+
+      wait 50 ms
+    next
+
+    for xVar = 1 To 5
+
+      gosub forwards
+
+      CLS
+      Locate(0, 1)
+      Print roomCounter
+      Locate(1,1)
+      Print distanceFront
+
+      gosub readSensors
+
+      if distanceFront <= 15 then
+        goto main
+      end if
+
+      wait 50 ms
+    next
+
+
+    for xVar = 1 To 3
+
+      gosub turnLeftInPlace
+
+      CLS
+      Locate(0, 1)
+      Print roomCounter
+      Locate(1,1)
+      Print distanceFront
+
+      gosub readSensors
+
+      if distanceFront <= 15 then
+        goto main
+      end if
+
+      wait 50 ms
+    next
+
+    for xVar = 1 To 5
+
+      gosub forwards
+
+      CLS
+      Locate(0, 1)
+      Print roomCounter
+      Locate(1,1)
+      Print distanceFront
+
+      gosub readSensors
+
+      if distanceFront <= 15 then
+        goto main
+      end if
+
+      wait 50 ms
+
+      next
+
+
+
+  loop
+
+  return
+
+
+sub readSensors
+
+ voltageLeft = ReadAD(AN0)
+ distanceLeft = (((6787/(voltageLeft-3)))-4)/5
+ voltageFront = ReadAD(AN1)
+ distanceFront = (((6787/(voltageFront-3)))-4)/5
+ voltageFlame = ReadAD(AN2)
+
+ return
+
+sub forwards
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+
+  return
+
+sub backwards
+
+  RMF = 0
+  LMF = 0
+  RMB = 1
+  LMB = 1
+
+  return
+
+sub stopBot
+
+  RMF = 0
+  LMF = 0
+  RMB = 0
+  LMB = 0
+
+  return
+
+sub turnLeftInPlace
+
+  RMF = 1
+  LMF = 0
+  RMB = 0
+  LMB = 1
+
+  return
+
+sub turnRightInPlace
+
+  RMF = 0
+  LMF = 1
+  RMB = 1
+  LMB = 0
+
+  return
+
+sub lineDetection
+
+  roomCounter += 1
+
+  if LS = 0 then
+
+  gosub lineDetection
+
+  end if
+
+  goto main
+
+sub closeLeft
+
+  gosub turnRightInPlace
+  wait 1 ms
+  gosub forwards
+  wait 3 ms
+
+  return
+
+sub farLeft
+
+  gosub turnLeftInPlace
+  wait 1 ms
+  gosub forwards
+  wait 4 ms
+
+  return
+
+sub smoothTurnLeft
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 2 ms
+  RMF = 1
+  LMF = 0
+  RMB = 0
+  LMB = 0
+  wait 4 ms
+
+return
+
+sub smoothTurnRight
+
+  RMF = 1
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 2 ms
+  RMF = 0
+  LMF = 1
+  RMB = 0
+  LMB = 0
+  wait 4 ms
+
+return
+
+sub outFlame
+
+  FAN = 1
+  gosub forwards
+  wait 400 ms
+  gosub stopBot
+  wait 600 ms
+
+  gosub turnLeftInPlace
+  wait 300 ms
+
+  For xVar = 1 To 3
+
+    gosub turnRightInPlace
+    wait 600 ms
+    gosub turnLeftInPlace
+    wait 600 ms
+  next
+
+  gosub turnRightInPlace
+  wait 300 ms
+
+  FAN = 0
+
+  return
