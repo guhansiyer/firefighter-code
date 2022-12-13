@@ -313,6 +313,7 @@ sub followWall
 
 return
 
+' Reads voltage values off wall detection sensors and linearizes them to compute distance, reads flame sensor voltage for flame detection
 sub readSensors
 
  voltageLeft = ReadAD(AN0)
@@ -320,9 +321,10 @@ sub readSensors
  voltageFront = ReadAD(AN1)
  distanceFront = (((6787/(voltageFront-3)))-4)/5
  voltageFlame = ReadAD(AN2)
+return
 
- return
 
+' Sets the forward component of both motors to 'high'
 sub forwards
 
   RMF = 1
@@ -330,8 +332,9 @@ sub forwards
   RMB = 0
   LMB = 0
 
-  return
+return
 
+' Sets the backwards component of both motors to 'high'
 sub backwards
 
   RMF = 0
@@ -339,8 +342,9 @@ sub backwards
   RMB = 1
   LMB = 1
 
-  return
+return
 
+' Sets all motors to 'low', stopping motion
 sub stopBot
 
   RMF = 0
@@ -348,8 +352,9 @@ sub stopBot
   RMB = 0
   LMB = 0
 
-  return
+return
 
+' Sets the right motor forward and left motor backward component to high, and all others to low
 sub turnLeftInPlace
 
   RMF = 1
@@ -357,8 +362,9 @@ sub turnLeftInPlace
   RMB = 0
   LMB = 1
 
-  return
+return
 
+' Sets the left motor forward and right motor backward component to high, and all others to low
 sub turnRightInPlace
 
   RMF = 0
@@ -366,20 +372,9 @@ sub turnRightInPlace
   RMB = 1
   LMB = 0
 
-  return
+return
 
-sub lineDetection
-
-  roomCounter += 1
-
-  if LS = 0 then
-
-  gosub lineDetection
-
-  end if
-
-  goto main
-
+' Turn that is preformed when the bot is too close to the left wall
 sub closeLeft
 
   RMF = 0
@@ -390,8 +385,9 @@ sub closeLeft
   gosub forwards
   wait 3 ms
 
-  return
+return
 
+' Turn that is performed when the bot is too far from the left wall
 sub farLeft
 
   RMF = 1
@@ -402,8 +398,9 @@ sub farLeft
   gosub forwards
   wait 3 ms
 
-  return
+return
 
+' Turn that is preformed when the bot is too close to the left wall. Sharper turn than closeLeft. 
 sub closeLeftS
 
   gosub turnRightInPlace
@@ -411,8 +408,9 @@ sub closeLeftS
   gosub forwards
   wait 2 ms
 
-  return
+return
 
+' Turn that is performed when the bot is too far from the left wall. Sharper turn than farLeft. 
 sub farLeftS
 
   gosub turnLeftInPlace
@@ -420,8 +418,9 @@ sub farLeftS
   gosub forwards
   wait 2 ms
 
-  return
+return
 
+' Turn performed when the bot is too close to the left wall. Needed for the bot's reversal procedure in room 3. 
 sub closeLeftB
 
   gosub turnLeftInPlace
@@ -429,8 +428,9 @@ sub closeLeftB
   gosub backwards
   wait 3 ms
 
-  return
+return
 
+' Turn performed when the bot is too far to the left wall. Needed for the bot's reversal procedure in room 3. 
 sub farLeftB
 
   gosub turnRightInPlace
@@ -438,14 +438,12 @@ sub farLeftB
   gosub backwards
   wait 3 ms
 
-  return
+return
 
+'  A gradual left turn. 
 sub smoothTurnLeft
 
-  RMF = 1
-  LMF = 1
-  RMB = 0
-  LMB = 0
+  gosub forwards
   wait 2 ms
   RMF = 1
   LMF = 0
@@ -455,6 +453,7 @@ sub smoothTurnLeft
 
 return
 
+'A gradual right turn. 
 sub smoothTurnRight
 
   RMF = 1
@@ -470,18 +469,10 @@ sub smoothTurnRight
 
 return
 
-sub sharpTurnLeft
-
-  gosub forwards
-  wait 1 ms
-  gosub turnLeftInPlace
-  wait 4 ms
-
-return
-
+' An extensive subroutine to extinguish the flame, depending on it's position in each room. 
 sub outFlame
 
-  if roomCounter = 1 then
+  if roomCounter = 1 then 
     gosub forwards
     wait 250 ms
     gosub turnRightInPlace
@@ -495,12 +486,14 @@ sub outFlame
       wait 350 ms
       gosub forwards
       wait 1750 ms
-
+    
+    '
     else if roomCounter = 3 then
-
+      ' At the point where outFlame is called in sub room3, the bot will perform a right turn for 500 ms. 
       gosub turnRightInPlace
       wait 500 ms
 
+      ' The bot slowly creeps forward until it reaches the line.
       Do Until LS = 0
         gosub readSensors
         gosub forwards
@@ -508,8 +501,10 @@ sub outFlame
         gosub stopBot
         wait 2 ms
 
+        ' Correction for if the bot is facing right instead of straight forward. 
         if distanceFront <= 10 then
-
+          gosub backwards
+          wait 100 ms
           Do Until distanceFront >= 15
             gosub turnLeftInPlace
           loop
@@ -517,11 +512,13 @@ sub outFlame
         end if
       loop
 
+      ' When the bot has reached the line, it goes backwards a slight amount before running the general outFlame routine. 
       gosub backwards
       wait 250 ms
 
+    ' Because room 3 has two lines that the bot crosses, room 4 is reached when roomCounter = 5.
     else if roomCounter = 5 then
-
+      
       gosub turnRightInPlace
       wait 400 ms
       gosub forwards
@@ -529,6 +526,7 @@ sub outFlame
 
   end if
 
+  ' This is the beginning of the general routine for outFlame.
   FAN = 1
 
   gosub stopBot
@@ -537,6 +535,7 @@ sub outFlame
   gosub turnLeftInPlace
   wait 400 ms
 
+  ' The bot spins from right to left in place, in order to catch the flame in a wide area. 
   For xVar = 1 To 3
 
     gosub turnRightInPlace
@@ -545,6 +544,7 @@ sub outFlame
     wait 800 ms
   next
 
+  'The bot returns to its original position before the fan is put out. 
   gosub turnRightInPlace
   wait 400 ms
 
