@@ -313,6 +313,8 @@ sub followWall
 
 return
 
+''SUBROUTINES''
+
 ' Reads voltage values off wall detection sensors and linearizes them to compute distance, reads flame sensor voltage for flame detection
 sub readSensors
 
@@ -456,10 +458,7 @@ return
 'A gradual right turn. 
 sub smoothTurnRight
 
-  RMF = 1
-  LMF = 1
-  RMB = 0
-  LMB = 0
+  gosub forwards
   wait 2 ms
   RMF = 0
   LMF = 1

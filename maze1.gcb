@@ -230,11 +230,11 @@ sub room4
 
   loop
 
-  return
+return
 
-' sub routines
+''SUBROUTINES''
 
-' reads sensor values
+' Reads voltage values off wall detection sensors and linearizes them to compute distance, reads flame sensor voltage for flame detection
 sub readSensors
 
  voltageLeft = ReadAD(AN0)
@@ -243,11 +243,11 @@ sub readSensors
  distanceFront = (((6787/(voltageFront-3)))-4)/5
  voltageFlame = ReadAD(AN2)
 
- return
+return
 
 
 
-' sets motors to forwards
+' Sets the forward component of both motors to 'high'
 sub forwards
 
   RMF = 1
@@ -255,8 +255,9 @@ sub forwards
   RMB = 0
   LMB = 0
 
-  return
-' sets motors to backwards
+return
+
+' Sets the backwards component of both motors to 'high'
 sub backwards
 
   RMF = 0
@@ -264,9 +265,9 @@ sub backwards
   RMB = 1
   LMB = 1
 
-  return
+return
   
-' sets motors to stop
+' Sets all motors to 'low', stopping motion
 sub stopBot
 
   RMF = 0
@@ -274,9 +275,9 @@ sub stopBot
   RMB = 0
   LMB = 0
 
-  return
+return
   
-' sets left motor to backwards and right motor to forwards
+' Sets the right motor forward and left motor backward component to high, and all others to low
 sub turnLeftInPlace
 
   RMF = 1
@@ -284,9 +285,9 @@ sub turnLeftInPlace
   RMB = 0
   LMB = 1
 
-  return
+return
   
-' sets left motor to forwards and right motor to backwards
+' Sets the left motor forward and right motor backward component to high, and all others to low
 sub turnRightInPlace
 
   RMF = 0
@@ -294,9 +295,9 @@ sub turnRightInPlace
   RMB = 1
   LMB = 0
 
-  return
+return
 
-' 
+' Turn performed when the bot is too close to the left wall. Needed for the bot's reversal procedure in room 3.
 sub closeLeft
 
   gosub turnRightInPlace
@@ -304,9 +305,9 @@ sub closeLeft
   gosub forwards
   wait 3 ms
 
-  return
+return
   
-' turns left a little then goes forwards, for an open smooth left turn
+' Turn performed when the bot is too far to the left wall. Needed for the bot's reversal procedure in room 3.
 sub farLeft
 
   gosub turnLeftInPlace
@@ -314,9 +315,9 @@ sub farLeft
   gosub forwards
   wait 3 ms
 
-  return
+return
 
-' turns right a little then goes forwards, for an open smooth right turn
+'  A gradual left turn. 
 sub smoothTurnLeft
 
   gosub forwards
@@ -329,6 +330,7 @@ sub smoothTurnLeft
 
 return
 
+'A gradual right turn.
 sub smoothTurnRight
 
   gosub forwards
@@ -341,7 +343,7 @@ sub smoothTurnRight
 
 return
 
-' A subroutine with instructions on what the bot needs to do when a flame is detected
+' An extensive subroutine to extinguish the flame, depending on it's position in each room. 
 sub outFlame
 
   ' turns the fan ON and approaches the flame
