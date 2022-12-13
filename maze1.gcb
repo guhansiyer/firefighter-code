@@ -36,55 +36,61 @@ DIM distanceLeft AS BYTE
 DIM voltageFlame AS BYTE
 DIM roomCounter AS INTEGER
 DIM xVar AS WORD
-
+' Intitializing roomCounter
 roomCounter = 0
+
 
 main:
 
-  gosub doStuff
+  gosub followWall
 
   goto main
 
-sub doStuff
+' Follows the Left wall
+sub followWall
 
   CLS
   Locate(0, 1)
   Print roomCounter
   Locate(1,1)
   Print distanceLeft
-
+  ' reading sensor values
   gosub readSensors
-
+  
+  ' Line Detected
   if LS = 0 then
-
+      
+      ' increase Room Counter
       roomCounter += 1
+      ' forwards to only couunt each line passing once
       gosub forwards
       wait 100 ms
-       if roomCounter = 6 then
+      ' if it leaves room 3
+      if roomCounter = 6 then
         roomCounter += 1
         gosub room4
       end if
-
+    ' finds flame
     else if voltageFlame <= 5 then
 
       gosub outFlame
-
+    ' too close to the front wall
     else if distanceFront <= 15 then
 
       gosub turnRightInPlace
-
+    ' no wall on the left
     else if distanceLeft >= 20 then
 
       gosub smoothTurnLeft
-
+    ' too far to the left wall, correcting
     else if distanceLeft >= 10 then
 
       gosub farLeft
-
+    ' too close to the left wall, correcting
     else if distanceLeft <= 8 then
 
       gosub closeLeft
-
+ 
     else
 
       gosub forwards
@@ -93,8 +99,10 @@ sub doStuff
 
   return
 
+' instructions on what to do after it leaves room 3
 sub room4
 
+  ' Done after leaves room 3, finds wall to line itself up
   Do Until distanceFront <= 10
     CLS
     Locate(0, 1)
@@ -107,10 +115,11 @@ sub room4
 
   loop
 
-
+  ' stops the bot for consistency
   gosub stopBot
   wait 500 ms
 
+  ' lines itself up to the left wall
   Do Until distanceFront >= 15
 
     CLS
@@ -125,6 +134,7 @@ sub room4
 
   loop
 
+  ' setup to find room4's wall
   gosub forwards
   wait 750 ms
 
@@ -137,6 +147,7 @@ sub room4
   gosub turnRightInPlace
   wait 150 ms
 
+  ' searches for room4's wall
   Do Until distanceFront <= 15
 
     for xVar = 1 To 3
@@ -217,13 +228,13 @@ sub room4
 
       next
 
-
-
   loop
 
   return
 
+' sub routines
 
+' reads sensor values
 sub readSensors
 
  voltageLeft = ReadAD(AN0)
@@ -234,6 +245,9 @@ sub readSensors
 
  return
 
+
+
+' sets motors to forwards
 sub forwards
 
   RMF = 1
@@ -242,7 +256,7 @@ sub forwards
   LMB = 0
 
   return
-
+' sets motors to backwards
 sub backwards
 
   RMF = 0
@@ -251,7 +265,8 @@ sub backwards
   LMB = 1
 
   return
-
+  
+' sets motors to stop
 sub stopBot
 
   RMF = 0
@@ -260,7 +275,8 @@ sub stopBot
   LMB = 0
 
   return
-
+  
+' sets left motor to backwards and right motor to forwards
 sub turnLeftInPlace
 
   RMF = 1
@@ -269,7 +285,8 @@ sub turnLeftInPlace
   LMB = 1
 
   return
-
+  
+' sets left motor to forwards and right motor to backwards
 sub turnRightInPlace
 
   RMF = 0
@@ -279,18 +296,7 @@ sub turnRightInPlace
 
   return
 
-sub lineDetection
-
-  roomCounter += 1
-
-  if LS = 0 then
-
-  gosub lineDetection
-
-  end if
-
-  goto main
-
+' 
 sub closeLeft
 
   gosub turnRightInPlace
@@ -299,54 +305,53 @@ sub closeLeft
   wait 3 ms
 
   return
-
+  
+' turns left a little then goes forwards, for an open smooth left turn
 sub farLeft
 
   gosub turnLeftInPlace
   wait 1 ms
   gosub forwards
-  wait 4 ms
+  wait 3 ms
 
   return
 
+' turns right a little then goes forwards, for an open smooth right turn
 sub smoothTurnLeft
 
-  RMF = 1
-  LMF = 1
-  RMB = 0
-  LMB = 0
+  gosub forwards
   wait 2 ms
   RMF = 1
   LMF = 0
   RMB = 0
   LMB = 0
-  wait 4 ms
+  wait 5 ms
 
 return
 
 sub smoothTurnRight
 
-  RMF = 1
-  LMF = 1
-  RMB = 0
-  LMB = 0
+  gosub forwards
   wait 2 ms
   RMF = 0
   LMF = 1
   RMB = 0
   LMB = 0
-  wait 4 ms
+  wait 5 ms
 
 return
 
+' A subroutine with instructions on what the bot needs to do when a flame is detected
 sub outFlame
 
+  ' turns the fan ON and approaches the flame
   FAN = 1
   gosub forwards
   wait 400 ms
   gosub stopBot
   wait 600 ms
 
+  ' Turns left and right repeatedly to be sure that the flame is extinguished
   gosub turnLeftInPlace
   wait 300 ms
 
@@ -361,6 +366,7 @@ sub outFlame
   gosub turnRightInPlace
   wait 300 ms
 
+  ' Turns off fan
   FAN = 0
 
   return
