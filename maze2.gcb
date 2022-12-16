@@ -1,3 +1,7 @@
+'' FIREFIGHTER CODE: MAZE 2''
+'' 16/12/2022 ''
+'' Antonio Rech Santos and Guhan Iyer ''
+
 ' Chip definition
 #CHIP 16F18875
 
@@ -48,7 +52,6 @@ main:
 goto main
 
 sub room3
-
 
   ' After entering room 3 it finds the right wall
   Do Until distanceFront <= 10
@@ -182,7 +185,7 @@ sub room4
   gosub turnLeftInPlace
   wait 40 ms
 
-  ' Goes slowly up to the line, because otherwise it will fall off the maze
+  ' Goes slowly up to the line to avoid the pit 
   Do Until LS = 0
     
     gosub readSensors
@@ -194,12 +197,13 @@ sub room4
     end if
   loop
 
-  ' Backwards to not fall off
+  ' Backwards to not fall in
   gosub backwards
   wait 350 ms
 
   gosub stopBot
   wait 500 ms
+
   ' Turns to enter room 4
   gosub turnLeftInPlace
   wait 375 ms
@@ -273,22 +277,25 @@ sub followWall
     
      roomCounter += 1
 
-     
+     ' Go forward for alignment
      gosub forwards
      wait 100 ms
-
+     
+     ' Turn left into room 4
      gosub turnLeftInPlace
      wait 350 ms
-
+    
+     ' Go forward until the bot crosses the line and is in room 4
      Do Until LS = 0
       gosub forwards
       gosub readSensors
      loop
 
+
      gosub room4
 
-
     '' Conditions to run turning subroutines ''
+
     else if voltageFlame <= 12 then
 
       gosub outFlame
@@ -316,6 +323,7 @@ sub followWall
     else if distanceLeft <= 10 then
 
       gosub closeLeft
+
     else
 
       gosub forwards
@@ -334,6 +342,7 @@ sub readSensors
  voltageFront = ReadAD(AN1)
  distanceFront = (((6787/(voltageFront-3)))-4)/5
  voltageFlame = ReadAD(AN2)
+
 return
 
 
@@ -482,7 +491,8 @@ return
 ' An extensive subroutine to extinguish the flame, depending on it's position in each room. 
 sub outFlame
 
-  if roomCounter = 1 then 
+  if roomCounter = 1 then
+    ' Approaches the flame  
     gosub forwards
     wait 250 ms
     gosub turnRightInPlace
@@ -491,7 +501,7 @@ sub outFlame
     wait 1250 ms
 
     else if roomCounter = 2 then
-
+      ' Right turn to approach the flame 
       gosub turnRightInPlace
       wait 350 ms
       gosub forwards
@@ -554,10 +564,10 @@ sub outFlame
     wait 800 ms
   next
 
-  'The bot returns to its original position before the fan is put out. 
+  ' The bot returns to its original position before the fan is put out. 
   gosub turnRightInPlace
   wait 400 ms
 
   FAN = 0
 
-  return
+return
