@@ -45,7 +45,7 @@ main:
 
   gosub followWall
 
-  goto main
+goto main
 
 sub room3
 
@@ -146,7 +146,7 @@ sub room3
   gosub forwards
   wait 750 ms
 
-  return
+return
 
 sub room4
 
@@ -237,34 +237,44 @@ sub room4
     gosub outFlame
   end if
 
-  return
+return
 
+' Follows the left wall
 sub followWall
 
+  ' Printing values for debugging
   CLS
   Locate(0, 1)
   Print roomCounter
   Locate(1,1)
   Print distanceLeft
 
+  'Read sensor values before proceeding
   gosub readSensors
 
+  ' If a line is detected
   if LS = 0 then
 
+    ' Increment the room counter
     roomCounter += 1
+    ' Go forwards to move the bot off the line and prevent it from being read twice
     gosub forwards
     wait 100 ms
 
+    ' When roomCounter = 3 for maze 2, run procedures for room 3
     if roomCounter = 3 then
 
       gosub room3
 
     end if
 
+    ' When roomCounter = 4, the bot has exited room 3. When distanceFront <= 16, the bot is nearing the turn into room 4. 
     else if roomCounter = 4 and distanceFront <= 16 then
 
+    
      roomCounter += 1
 
+     
      gosub forwards
      wait 100 ms
 
@@ -278,6 +288,8 @@ sub followWall
 
      gosub room4
 
+
+    '' Conditions to run turning subroutines ''
     else if voltageFlame <= 12 then
 
       gosub outFlame

@@ -49,6 +49,7 @@ main:
 ' Follows the Left wall
 sub followWall
 
+  ' Printing values for debugging
   CLS
   Locate(0, 1)
   Print roomCounter
