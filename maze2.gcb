@@ -159,16 +159,11 @@ sub room3
 
 sub room4
 
-  if distanceFront <= 10 then
-    Do Until distanceFront >= 15
-      gosub readSensors
-      gosub turnLeftInPlace
-    loop
-  end if
-
+  ' Fixing allignment
   gosub turnLeftInPlace
   wait 75 ms
 
+  ' Goes forwards until it finds a wall
   Do Until distanceFront <= 10
 
     gosub readSensors
@@ -176,62 +171,58 @@ sub room4
   loop
 
   gosub readSensors
-
+  
+  ' Turns left to go to the line
   Do Until distanceFront >= 15
     gosub turnLeftInPlace
     gosub readSensors
   loop
 
+  ' Fixing Allignment
   gosub turnLeftInPlace
   wait 40 ms
 
+  ' Goes slowly up to the line, because otherwise it will fall off the maze
   Do Until LS = 0
+    
     gosub readSensors
     gosub forwards
     wait 1 ms
     gosub stopBot
     wait 1 ms
 
-    if distanceFront <= 10 then
-
-      gosub backwards
-      wait 100 ms
-
-        Do Until distanceFront >= 15
-          gosub readSensors
-          gosub turnLeftInPlace
-        loop
-
     end if
   loop
 
+  ' Backwards to not fall off
   gosub backwards
   wait 350 ms
 
   gosub stopBot
   wait 500 ms
-
+  ' Turns to enter room 4
   gosub turnLeftInPlace
   wait 375 ms
 
   gosub readSensors
 
+  ' Forwards until finds a wall 
   Do until distanceFront <= 10
     gosub readSensors
     gosub forwards
   loop
 
+  ' Turns to enter room 4
   gosub readSensors
   gosub turnRightInPlace
   wait 325 ms
 
-
-
   gosub stopBot
   wait 300 ms
 
   gosub readSensors
-
+  
+  ' Enters room 4
   Do until distanceFront <= 10
     gosub readSensors
     gosub forwards
@@ -240,8 +231,7 @@ sub room4
   gosub stopBot
   wait 300 ms
   gosub readSensors
-  gosub forwards
-
+  ' Looks for Flame
   if voltageFlame <= 15 then
     gosub outFlame
   end if
