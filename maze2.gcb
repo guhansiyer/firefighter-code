@@ -83,7 +83,7 @@ sub room3
   gosub turnLeftInPlace
   wait 100 ms
 
-  ' Goes backwards until the wall ends 
+  ' Goes backwards until the wall ends
   Do Until distanceLeft >= 20
 
     gosub readSensors
@@ -120,7 +120,7 @@ sub room3
   for xVar = 0 To 10
 
     gosub readSensors
-    
+
     if voltageFlame <= 100 then
 
       gosub outFlame
@@ -174,7 +174,7 @@ sub room4
   loop
 
   gosub readSensors
-  
+
   ' Turns left to go to the line
   Do Until distanceFront >= 15
     gosub turnLeftInPlace
@@ -185,16 +185,16 @@ sub room4
   gosub turnLeftInPlace
   wait 40 ms
 
-  ' Goes slowly up to the line to avoid the pit 
+  ' Goes slowly up to the line to avoid the pit
   Do Until LS = 0
-    
+
     gosub readSensors
     gosub forwards
     wait 1 ms
     gosub stopBot
     wait 1 ms
 
-    end if
+
   loop
 
   ' Backwards to not fall in
@@ -210,7 +210,7 @@ sub room4
 
   gosub readSensors
 
-  ' Forwards until finds a wall 
+  ' Forwards until finds a wall
   Do until distanceFront <= 10
     gosub readSensors
     gosub forwards
@@ -225,7 +225,7 @@ sub room4
   wait 300 ms
 
   gosub readSensors
-  
+
   ' Enters room 4
   Do until distanceFront <= 10
     gosub readSensors
@@ -271,20 +271,20 @@ sub followWall
 
     end if
 
-    ' When roomCounter = 4, the bot has exited room 3. When distanceFront <= 16, the bot is nearing the turn into room 4. 
+    ' When roomCounter = 4, the bot has exited room 3. When distanceFront <= 16, the bot is nearing the turn into room 4.
     else if roomCounter = 4 and distanceFront <= 16 then
 
-    
+
      roomCounter += 1
 
      ' Go forward for alignment
      gosub forwards
      wait 100 ms
-     
+
      ' Turn left into room 4
      gosub turnLeftInPlace
      wait 350 ms
-    
+
      ' Go forward until the bot crosses the line and is in room 4
      Do Until LS = 0
       gosub forwards
@@ -422,7 +422,7 @@ sub farLeft
 
 return
 
-' Turn that is preformed when the bot is too close to the left wall. Sharper turn than closeLeft. 
+' Turn that is preformed when the bot is too close to the left wall. Sharper turn than closeLeft.
 sub closeLeftS
 
   gosub turnRightInPlace
@@ -432,7 +432,7 @@ sub closeLeftS
 
 return
 
-' Turn that is performed when the bot is too far from the left wall. Sharper turn than farLeft. 
+' Turn that is performed when the bot is too far from the left wall. Sharper turn than farLeft.
 sub farLeftS
 
   gosub turnLeftInPlace
@@ -442,7 +442,7 @@ sub farLeftS
 
 return
 
-' Turn performed when the bot is too close to the left wall. Needed for the bot's reversal procedure in room 3. 
+' Turn performed when the bot is too close to the left wall. Needed for the bot's reversal procedure in room 3.
 sub closeLeftB
 
   gosub turnLeftInPlace
@@ -452,7 +452,7 @@ sub closeLeftB
 
 return
 
-' Turn performed when the bot is too far to the left wall. Needed for the bot's reversal procedure in room 3. 
+' Turn performed when the bot is too far to the left wall. Needed for the bot's reversal procedure in room 3.
 sub farLeftB
 
   gosub turnRightInPlace
@@ -462,7 +462,7 @@ sub farLeftB
 
 return
 
-'  A gradual left turn. 
+'  A gradual left turn.
 sub smoothTurnLeft
 
   gosub forwards
@@ -475,7 +475,7 @@ sub smoothTurnLeft
 
 return
 
-'A gradual right turn. 
+'A gradual right turn.
 sub smoothTurnRight
 
   gosub forwards
@@ -488,11 +488,11 @@ sub smoothTurnRight
 
 return
 
-' An extensive subroutine to extinguish the flame, depending on it's position in each room. 
+' An extensive subroutine to extinguish the flame, depending on it's position in each room.
 sub outFlame
 
   if roomCounter = 1 then
-    ' Approaches the flame  
+    ' Approaches the flame
     gosub forwards
     wait 250 ms
     gosub turnRightInPlace
@@ -501,15 +501,15 @@ sub outFlame
     wait 1250 ms
 
     else if roomCounter = 2 then
-      ' Right turn to approach the flame 
+      ' Right turn to approach the flame
       gosub turnRightInPlace
       wait 350 ms
       gosub forwards
       wait 1750 ms
-    
+
     '
     else if roomCounter = 3 then
-      ' At the point where outFlame is called in sub room3, the bot will perform a right turn for 500 ms. 
+      ' At the point where outFlame is called in sub room3, the bot will perform a right turn for 500 ms.
       gosub turnRightInPlace
       wait 500 ms
 
@@ -521,7 +521,7 @@ sub outFlame
         gosub stopBot
         wait 2 ms
 
-        ' Correction for if the bot is facing right instead of straight forward. 
+        ' Correction for if the bot is facing right instead of straight forward.
         if distanceFront <= 10 then
           gosub backwards
           wait 100 ms
@@ -532,13 +532,13 @@ sub outFlame
         end if
       loop
 
-      ' When the bot has reached the line, it goes backwards a slight amount before running the general outFlame routine. 
+      ' When the bot has reached the line, it goes backwards a slight amount before running the general outFlame routine.
       gosub backwards
       wait 250 ms
 
     ' Because room 3 has two lines that the bot crosses, room 4 is reached when roomCounter = 5.
     else if roomCounter = 5 then
-      
+
       gosub turnRightInPlace
       wait 400 ms
       gosub forwards
@@ -555,7 +555,7 @@ sub outFlame
   gosub turnLeftInPlace
   wait 400 ms
 
-  ' The bot spins from right to left in place, in order to catch the flame in a wide area. 
+  ' The bot spins from right to left in place, in order to catch the flame in a wide area.
   For xVar = 1 To 3
 
     gosub turnRightInPlace
@@ -564,7 +564,7 @@ sub outFlame
     wait 800 ms
   next
 
-  ' The bot returns to its original position before the fan is put out. 
+  ' The bot returns to its original position before the fan is put out.
   gosub turnRightInPlace
   wait 400 ms
 
