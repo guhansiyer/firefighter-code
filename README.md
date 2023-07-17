@@ -4,4 +4,4 @@ In our grade twelve Computer Engineering class, we were tasked with building a f
 
 Available in this repository are the base programs for the microcontroller, in the .gcb format. Also available are compiled versions of the file, in both raw hex and assembly, and the project proposal that contains the general outline of this project and information on the robot's numerous subsystems.
 
-[Attached] (https://www.youtube.com/watch?v=__ndANnyCtA) is a run of our robot, in which it set a new record for one of two mazes. 
+[Attached](https://www.youtube.com/watch?v=__ndANnyCtA) is a run of our robot, in which it set a new record for one of two mazes. 
